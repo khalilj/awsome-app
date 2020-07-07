@@ -28,7 +28,9 @@ pipeline {
                 script {
                     withDockerRegistry([ credentialsId: "docker-hub", url: "" ]) {
                         image.push()
-                        image.push('latest')
+                        if (BRANCH_NAME.equals('master')) {
+                            image.push('latest')
+                        }
                     }
                 }
             }
