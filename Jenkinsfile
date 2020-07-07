@@ -10,7 +10,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    image = docker.build("awesome-app:${BRANCH_NAME}-${env.BUILD_NUMBER}")
+                    image = docker.build("khalilj/awesome-app:${BRANCH_NAME}-${env.BUILD_NUMBER}")
                 }
             }
         }
@@ -26,8 +26,10 @@ pipeline {
         stage('Push to Docker Registry') {
             steps {
                 script {
-                    image.push()
-                    image.push('latest')
+                    withDockerRegistry([ credentialsId: "docker-hub", url: "" ]) {
+                        image.push()
+                        image.push('latest')
+                    }
                 }
             }
         }
