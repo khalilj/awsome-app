@@ -1,7 +1,7 @@
 pipeline {
     agent {
         kubernetes {
-            label 'docker'
+            label 'generic-pod'
             defaultContainer 'docker'
         }
     }
@@ -10,6 +10,7 @@ pipeline {
         stage('Build') {
             steps {
                 script {
+                    echo 'Building....'
                     image = docker.build("khalilj/awesome-app:${BRANCH_NAME}-${env.BUILD_NUMBER}")
                 }
             }
@@ -18,7 +19,7 @@ pipeline {
             steps {
                 script {
                     image.inside {
-                        echo "Testing"
+                        echo "Testing..."
                     }
                 }
             }
@@ -26,9 +27,10 @@ pipeline {
         stage('Push to Docker Registry') {
             steps {
                 script {
+                    echo "Pushing image..."
                     withDockerRegistry([ credentialsId: "docker-hub", url: "" ]) {
                         image.push()
-                        if (BRANCH_NAME.equals('master')) {
+                        if (BRANCH_NAME == 'master') {
                             image.push('latest')
                         }
                     }
@@ -36,8 +38,13 @@ pipeline {
             }
         }
         stage('Deploy') {
+            when { expression { BRANCH_NAME == 'greeting' } }
+
             steps {
                 echo 'Deploying....'
+                container('helm') {
+                    sh "helm upgrade --install --force awesome-app-ci helm/"
+                }
             }
         }
     }
