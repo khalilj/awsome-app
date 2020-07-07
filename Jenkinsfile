@@ -43,7 +43,12 @@ pipeline {
             steps {
                 echo 'Deploying....'
                 container('helm') {
-                    sh "helm upgrade --install --force awesome-app-ci helm/"
+                    withCredentials([file(credentialsId: 'K8S_KUBE_CONFIG', variable: 'kubeConfig')]){
+                        script {
+                            sh "mkdir ~/.kube && cp $kubeConfig ~/.kube/config"
+                            sh "helm upgrade --install --force --namespace toluna-system awesome-app-ci helm/"
+                        }
+                    }
                 }
             }
         }
