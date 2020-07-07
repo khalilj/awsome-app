@@ -11,7 +11,8 @@ pipeline {
             steps {
                 script {
                     echo 'Building....'
-                    image = docker.build("khalilj/awesome-app:${BRANCH_NAME}-${env.BUILD_NUMBER}")
+                    tag = "${BRANCH_NAME}-${env.BUILD_NUMBER}"
+                    image = docker.build("khalilj/awesome-app:${tag}")
                 }
             }
         }
@@ -46,7 +47,7 @@ pipeline {
                     withCredentials([file(credentialsId: 'K8S_KUBE_CONFIG', variable: 'kubeConfig')]){
                         script {
                             sh "mkdir ~/.kube && cp $kubeConfig ~/.kube/config"
-                            sh "helm upgrade --install --force --namespace toluna-system awesome-app-ci helm/"
+                            sh "helm upgrade --install --force --namespace toluna-system --set image.tag=${tag} awesome-app-ci helm/"
                         }
                     }
                 }
