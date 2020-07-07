@@ -1,10 +1,35 @@
 pipeline {
     agent {
-        kubernetes {
-            label 'generic-pod'
-            defaultContainer 'docker'
-        }
+    kubernetes {
+      yaml """
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    some-label: some-label-value
+spec:
+  containers:
+  - name: docker
+    image: docker:latest
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - mountPath: "/var/run/docker.sock"
+      name: "volume-0"
+      readOnly: false
+  - name: helm
+    image: alpine/helm:2.14.0
+    command:
+    - cat
+    tty: true
+  volumes:
+  - hostPath:
+      path: "/var/run/docker.sock"
+    name: "volume-0"
+"""
     }
+  }
 
     stages {
         stage('Build') {
@@ -12,7 +37,9 @@ pipeline {
                 script {
                     echo 'Building....'
                     tag = "${BRANCH_NAME}-${env.BUILD_NUMBER}"
-                    image = docker.build("khalilj/awesome-app:${tag}")
+                    container('docker') {
+                        image = docker.build("khalilj/awesome-app:${tag}")
+                    }
                 }
             }
         }
@@ -30,9 +57,11 @@ pipeline {
                 script {
                     echo "Pushing image..."
                     withDockerRegistry([ credentialsId: "docker-hub", url: "" ]) {
-                        image.push()
-                        if (BRANCH_NAME == 'master') {
-                            image.push('latest')
+                        container('docker') {
+                            image.push()
+                            if (BRANCH_NAME == 'master') {
+                                image.push('latest')
+                            }
                         }
                     }
                 }
