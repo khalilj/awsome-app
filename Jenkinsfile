@@ -2,19 +2,19 @@ pipeline {
     agent {
         kubernetes {
             yaml """
-                apiVersion: v1
-                kind: Pod
-                spec:
-                containers:
-                - name: docker
-                    image: docker
-                    command:
-                    - cat
-                    tty: true
-                volumes:
-                - name: dockersock
-                    hostPath: /var/run/docker.sock
-                    mountPath: /var/run/docker.sock
+apiVersion: v1
+kind: Pod
+spec:
+containers:
+- name: docker
+    image: docker
+    command:
+    - cat
+    tty: true
+volumes:
+- name: dockersock
+    hostPath: /var/run/docker.sock
+    mountPath: /var/run/docker.sock
                 """
         }
     }
