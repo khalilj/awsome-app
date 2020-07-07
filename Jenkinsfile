@@ -38,7 +38,7 @@ pipeline {
             }
         }
         stage('Deploy') {
-            when { expression { BRANCH_NAME == 'greeting' } }
+            when { expression { BRANCH_NAME == 'master' } }
 
             steps {
                 echo 'Deploying....'
