@@ -1,21 +1,8 @@
 pipeline {
     agent {
         kubernetes {
-            yaml """
-apiVersion: v1
-kind: Pod
-spec:
-containers:
-- name: docker
-    image: docker
-    command:
-    - cat
-    tty: true
-volumes:
-- name: dockersock
-    hostPath: /var/run/docker.sock
-    mountPath: /var/run/docker.sock
-                """
+            label 'default'
+            defaultContainer 'docker'
         }
     }
 
@@ -30,7 +17,7 @@ volumes:
         stage('Test') {
             steps {
                 script {
-                    customImage.inside {
+                    image.inside {
                         echo "Testing"
                     }
                 }
@@ -39,8 +26,8 @@ volumes:
         stage('Push to Docker Registry') {
             steps {
                 script {
-                    customImage.push()
-                    customImage.push('latest')
+                    image.push()
+                    image.push('latest')
                 }
             }
         }
