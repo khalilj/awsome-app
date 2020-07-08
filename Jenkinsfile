@@ -58,8 +58,8 @@ spec:
             steps {
                 script {
                     echo "Pushing image..."
-                    withDockerRegistry([ credentialsId: "docker-hub", url: "" ]) {
-                        container('docker') {
+                    container('docker') {
+                        withDockerRegistry([ credentialsId: "docker-hub", url: "" ]) {
                             image.push()
                             if (BRANCH_NAME == 'master') {
                                 image.push('latest')
