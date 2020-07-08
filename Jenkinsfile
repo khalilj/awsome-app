@@ -46,8 +46,10 @@ spec:
         stage('Test') {
             steps {
                 script {
-                    image.inside {
-                        echo "Testing..."
+                    container('docker') {
+                        image.inside {
+                            echo "Testing..."
+                        }
                     }
                 }
             }
